@@ -1,10 +1,56 @@
 ﻿@page
 @model HashMat.Pages.JohnModel
 @{
-    ViewData["Title"] = "John The Ripper";
+    ViewData["Title"] = "John";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Start</h1>
-    <p>This is JTR page</a>.</p>
-</div>
+<h1>John the Ripper</h1>
+
+<p>Click the button to run John the Ripper:</p>
+
+<form id="runJTRForm" method="post">
+    <button type="submit" asp-page-handler="RunJTR">Run John the Ripper</button>
+</form>
+
+<div id="output-container"></div>
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/commandHub")
+            .build();
+
+        connection.on("ReceiveOutput", function (output) {
+            // Append the output to the div
+            var outputContainer = document.getElementById("output-container");
+            outputContainer.innerHTML += output + "<br/>";
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        $("#runJTRForm").submit(function () {
+            var data = $(this).serialize();
+
+            // Make the AJAX request using jQuery
+            $.ajax({
+                type: 'POST',
+                url: '/John',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                data: data,
+                success: function (result) {
+                    console.log(result);
+                },
+                error: function () {
+                    console.log('Failed');
+                }
+            });
+
+            // Prevent the default form submission
+            return true;
+        });
+    </script>
+}

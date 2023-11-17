@@ -1,7 +1,10 @@
+using HashMat.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR(); // Add this line to enable SignalR
 
 var app = builder.Build();
 
@@ -21,5 +24,11 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<CommandHub>("/commandHub"); // Map the SignalR hub
+    endpoints.MapRazorPages();
+});
 
 app.Run();
