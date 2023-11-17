@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HashMat", "HashMat\HashMat.csproj", "{AEC9D125-FD5C-4848-ABB8-744FC0927064}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEC9D125-FD5C-4848-ABB8-744FC0927064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEC9D125-FD5C-4848-ABB8-744FC0927064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEC9D125-FD5C-4848-ABB8-744FC0927064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEC9D125-FD5C-4848-ABB8-744FC0927064}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B678426-BE8D-4083-9230-913A14E3E1EE}
+	EndGlobalSection
+EndGlobal
