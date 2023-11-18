@@ -6,13 +6,68 @@
 
 <h1>John the Ripper</h1>
 
-<p>Click the button to run John the Ripper:</p>
+<p>Configure the settings and click the button to run John the Ripper:</p>
 
-<form id="runJTRForm" method="post">
-    <button type="submit" asp-page-handler="RunJTR">Run John the Ripper</button>
+<form id="runJTRForm" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="hashListFile" class="form-label">Hash List File:</label>
+        <input type="file" class="form-control" name="hashListFile" id="hashListFile" />
+    </div>
+
+    <div class="mb-3">
+        <label for="wordListFile" class="form-label">Word List File:</label>
+        <input type="file" class="form-control" name="wordListFile" id="wordListFile" />
+    </div>
+
+    <div class="mb-3">
+        <label for="input" class="form-label">Input:</label>
+        <input type="text" class="form-control" name="input" id="input" />
+    </div>
+
+    <div class="mb-3">
+        <label for="algorithm" class="form-label">Algorithm:</label>
+        <select class="form-select" name="algorithm" id="algorithm">
+            @foreach (var algorithm in Model.Algorithms)
+            {
+                <option value="@algorithm">@algorithm</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="wordListOption" class="form-label">Word List Option:</label>
+        <select class="form-select" name="wordListOption" id="wordListOption">
+            <option value="no-wordlist">No Word List</option>
+            <option value="file">File</option>
+            <option value="selection">Selection</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="inputOption" class="form-label">Input Option:</label>
+        <select class="form-select" name="inputOption" id="inputOption">
+            <option value="input">Input</option>
+            <option value="file">File</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="selectedWordList" class="form-label">Selected Word List:</label>
+        <select class="form-select" name="selectedWordList" id="selectedWordList">
+            <option value="wordlist1">Word List 1</option>
+            <option value="wordlist2">Word List 2</option>
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+
+    <button type="button" class="btn btn-primary" onclick="runJTR()">Run John the Ripper</button>
 </form>
 
 <div id="output-container"></div>
+
+<button id="viewResultsButton" disabled onclick="viewResults()">View Results</button>
 
 @section scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
@@ -29,28 +84,34 @@
         });
 
         connection.start().catch(function (err) {
-            return console.error(err.toString());
+            console.error(err.toString());
         });
 
-        $("#runJTRForm").submit(function () {
-            var data = $(this).serialize();
+        function runJTR() {
+            // Use FormData to handle file inputs
+            var formData = new FormData(document.getElementById("runJTRForm"));
 
-            // Make the AJAX request using jQuery
             $.ajax({
-                type: 'POST',
-                url: '/John',
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                data: data,
-                success: function (result) {
-                    console.log(result);
+                type: "POST",
+                url: "/John?handler=RunJTR",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    // Log success message if needed
+                    console.log(data);
+                    // Enable the view results button
+                    $("#viewResultsButton").prop("disabled", false);
                 },
-                error: function () {
-                    console.log('Failed');
+                error: function (error) {
+                    console.error(error.responseText);
                 }
             });
+        }
 
-            // Prevent the default form submission
-            return true;
-        });
+        function viewResults() {
+            // Redirect to a new page or implement logic to display results
+            alert("Implement logic to display results here");
+        }
     </script>
 }
