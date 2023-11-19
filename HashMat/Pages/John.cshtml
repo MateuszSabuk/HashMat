@@ -4,70 +4,93 @@
     ViewData["Title"] = "John";
 }
 
-<h1>John the Ripper</h1>
+<div class="container my-4">
+    <div class="row">
+        <!-- Left Column: Input Options -->
+        <div class="col-md-6">
+            <h1 class="mb-4">John the Ripper</h1>
 
-<p>Configure the settings and click the button to run John the Ripper:</p>
+            <p>Configure the settings and click the button to run John the Ripper:</p>
 
-<form id="runJTRForm" method="post" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="hashListFile" class="form-label">Hash List File:</label>
-        <input type="file" class="form-control" name="hashListFile" id="hashListFile" />
+            <form id="runJTRForm" method="post" enctype="multipart/form-data">
+                <!-- Input Option Section -->
+                <div class="mb-4">
+                    <h4>Input Option:</h4>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="inputOption" id="inputOptionInput" value="input" checked>
+                        <label class="form-check-label mr-3" for="inputOptionInput">
+                            Input
+                        </label>
+                        <input type="text" class="form-control" name="input" id="input" />
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="inputOption" id="inputOptionFile" value="file">
+                        <label class="form-check-label mr-3" for="inputOptionFile">
+                            File
+                        </label>
+                        <input type="file" class="form-control-file" name="hashListFile" id="hashListFile" />
+                    </div>
+                </div>
+
+                <!-- Algorithm Section -->
+                <div class="mb-4">
+                    <h4 class="mb-3">Algorithm:</h4>
+                    <select class="form-control" name="algorithm" id="algorithm">
+                        @foreach (var algorithm in Model.Algorithms)
+                        {
+                            <option value="@algorithm">@algorithm</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Word List Option Section -->
+                <div class="mb-4">
+                    <h4>Word List Option:</h4>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="wordListOption" id="wordListOptionNo" value="no-wordlist" checked>
+                        <label class="form-check-label mr-3" for="wordListOptionNo">
+                            No Word List
+                        </label>
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="wordListOption" id="wordListOptionFile" value="file">
+                        <label class="form-check-label mr-3" for="wordListOptionFile">
+                            File
+                        </label>
+                        <input type="file" class="form-control-file" name="wordListFile" id="wordListFile" />
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="wordListOption" id="wordListOptionSelection" value="selection">
+                        <label class="form-check-label mr-3" for="wordListOptionSelection">
+                            Selection
+                        </label>
+                        <select class="form-control" name="selectedWordList" id="selectedWordList">
+                            <option value="wordlist1">Word List 1</option>
+                            <option value="wordlist2">Word List 2</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="runJTR()">Run John the Ripper</button>
+            </form>
+        </div>
+
+        <!-- Right Column: Output Container -->
+        <div class="col-md-6">
+            <div id="output-container">
+                <!-- Output will be displayed here -->
+            </div>
+
+            <button id="viewResultsButton" disabled class="btn btn-success mt-3" onclick="viewResults()">View Results</button>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label for="wordListFile" class="form-label">Word List File:</label>
-        <input type="file" class="form-control" name="wordListFile" id="wordListFile" />
-    </div>
-
-    <div class="mb-3">
-        <label for="input" class="form-label">Input:</label>
-        <input type="text" class="form-control" name="input" id="input" />
-    </div>
-
-    <div class="mb-3">
-        <label for="algorithm" class="form-label">Algorithm:</label>
-        <select class="form-select" name="algorithm" id="algorithm">
-            @foreach (var algorithm in Model.Algorithms)
-            {
-                <option value="@algorithm">@algorithm</option>
-            }
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label for="wordListOption" class="form-label">Word List Option:</label>
-        <select class="form-select" name="wordListOption" id="wordListOption">
-            <option value="no-wordlist">No Word List</option>
-            <option value="file">File</option>
-            <option value="selection">Selection</option>
-            <!-- Add more options as needed -->
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label for="inputOption" class="form-label">Input Option:</label>
-        <select class="form-select" name="inputOption" id="inputOption">
-            <option value="input">Input</option>
-            <option value="file">File</option>
-            <!-- Add more options as needed -->
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label for="selectedWordList" class="form-label">Selected Word List:</label>
-        <select class="form-select" name="selectedWordList" id="selectedWordList">
-            <option value="wordlist1">Word List 1</option>
-            <option value="wordlist2">Word List 2</option>
-            <!-- Add more options as needed -->
-        </select>
-    </div>
-
-    <button type="button" class="btn btn-primary" onclick="runJTR()">Run John the Ripper</button>
-</form>
-
-<div id="output-container"></div>
-
-<button id="viewResultsButton" disabled onclick="viewResults()">View Results</button>
+</div>
 
 @section scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
@@ -84,12 +107,12 @@
         });
 
         connection.start().catch(function (err) {
-            console.error(err.toString());
+            return console.error(err.toString());
         });
 
         function runJTR() {
-            // Use FormData to handle file inputs
             var formData = new FormData(document.getElementById("runJTRForm"));
+            console.log(formData);
 
             $.ajax({
                 type: "POST",
@@ -98,8 +121,7 @@
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    // Log success message if needed
-                    console.log(data);
+                    console.log(data); // Log success message if needed
                     // Enable the view results button
                     $("#viewResultsButton").prop("disabled", false);
                 },
@@ -113,5 +135,7 @@
             // Redirect to a new page or implement logic to display results
             alert("Implement logic to display results here");
         }
+
+
     </script>
 }

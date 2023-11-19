@@ -1,10 +1,12 @@
 using HashMat.Hubs;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddSignalR(); // Add this line to enable SignalR
+builder.Services.AddSignalR();
+builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 

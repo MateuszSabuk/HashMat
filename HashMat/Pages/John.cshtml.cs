@@ -7,7 +7,8 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using HashMat.Helpers;
-
+using System.Text.RegularExpressions;
+using System.Diagnostics.Metrics;
 
 namespace HashMat.Pages
 {
@@ -20,6 +21,7 @@ namespace HashMat.Pages
             _hubContext = hubContext;
             Algorithms = John.GetAvailableAlgorithms();
         }
+        private string displayedOutput = "";
 
         [HttpPost]
         public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList)
@@ -32,26 +34,46 @@ namespace HashMat.Pages
         public async Task<string> RunJTR(John john)
         {
             string problem = john.ValidateInput();
+            //Console.WriteLine("Problem: "+problem);
             if (problem.Length > 0)
             {
+                await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"Problem:>> {problem} <<");
                 return problem;
             }
-
 
             // Modify the command based on the new inputs
             string johnCommand = john.CreateJohnCommand();
 
-            // You can now use the provided input values in the command construction
+            Console.WriteLine  ("JohnCommand: "+ johnCommand);
 
+            string commandOutput = await RunCommand("/opt/john/run/john", johnCommand);
+            if (displayedOutput.Contains("use \"--show\""))
+            {
+                if (Regex.IsMatch(johnCommand, @"--((single)|(wordlist\S+))"))
+                {
+                    johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "--show");
+                }
+                else
+                {
+                    johnCommand += " --show ";
+                }
+
+                return await RunCommand("/opt/john/run/john", johnCommand);
+            }
+            return commandOutput;
+        }
+
+        private async Task<string> RunCommand(string command, string arguments)
+        {
             ProcessStartInfo psi = new ProcessStartInfo
             {
-                FileName = "/opt/john/run/john",
+                FileName = command,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                Arguments = johnCommand
+                Arguments = arguments
             };
 
             string output = "";
@@ -74,6 +96,7 @@ namespace HashMat.Pages
                     string line;
                     while ((line = await stringReader.ReadLineAsync()) != null)
                     {
+                        displayedOutput += line;
                         await _hubContext.Clients.All.SendAsync("ReceiveOutput", line);
                     }
                 }
@@ -100,9 +123,17 @@ namespace HashMat.Pages
                 {
                     string linesToSend = output.Substring(0, lastNewLineIndex + 1);
                     outputBuilder.Remove(0, lastNewLineIndex + 1);
+                    if(linesToSend.Length > 0 && linesToSend[linesToSend.Length - 1]== '\n') 
+                    {
+                        linesToSend = linesToSend.Remove(linesToSend.Length - 1, 1);
+                    }
+                    foreach (var line in linesToSend.Split("\n"))
+                    {
+                        displayedOutput += line;
 
-                    // Send the lines to the SignalR hub
-                    await _hubContext.Clients.All.SendAsync("ReceiveOutput", linesToSend);
+                        // Send the lines to the SignalR hub
+                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", line);
+                    }
                 }
             }
 

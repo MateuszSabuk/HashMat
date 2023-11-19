@@ -105,11 +105,6 @@ namespace HashMat.Helpers
                 problemBuilder.AppendLine("Word List File is required when Word List Option is set to 'file'.");
             }
 
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                problemBuilder.AppendLine("Input is required.");
-            }
-
             // TODO: More validation (Definitely file and algorithm validations
 
             return problemBuilder.ToString();
@@ -119,16 +114,16 @@ namespace HashMat.Helpers
             // Create list of arguments for john
             string command = string.Empty;
 
+
             // Set format
             if (!string.IsNullOrEmpty(algorithm) && algorithm != "Automatic")
             {
                 command += $"--format={algorithm} ";
             }
 
-            // Set type (single or specify wordlist)
+            // Set wordlist
             if (wordListOption == "no-wordlist")
             {
-                command += "--single ";
             }
             else if (wordListOption == "wordlist-from-file")
             {
@@ -161,7 +156,7 @@ namespace HashMat.Helpers
             {
                 var wordListPath = $"/root/wordlists/{selectedWordList}";
 
-                command += File.Exists(wordListPath) ? $"--wordlist={wordListPath} " : "--single ";
+                command += File.Exists(wordListPath) ? $"--wordlist={wordListPath} " : " ";
 
                 if (!File.Exists(wordListPath))
                 {
@@ -189,7 +184,6 @@ namespace HashMat.Helpers
             else if (inputOption == "file")
             {
                 var filePath = $"/tmp/{Helper.GetHashOfFile(hashListFile)}.txt";
-
                 try
                 {
                     var hashListFileHash = Helper.GetHashOfFile(hashListFile);
@@ -197,6 +191,7 @@ namespace HashMat.Helpers
 
                     command += (File.Exists(existingFilePath) ? existingFilePath : filePath) + " ";
 
+                    Console.WriteLine("File found?: "+ (File.Exists(existingFilePath) ? existingFilePath : filePath));
                     if (!File.Exists(existingFilePath))
                     {
                         // Read the content of hashListFile and write it to the file
@@ -204,6 +199,7 @@ namespace HashMat.Helpers
                         {
                             File.WriteAllText(filePath, streamReader.ReadToEnd(), Encoding.UTF8);
                             File.SetAttributes(filePath, FileAttributes.Hidden);
+                            Console.WriteLine("FileWritten");
                         }
                     }
                 }
@@ -212,7 +208,7 @@ namespace HashMat.Helpers
                     Console.Error.WriteLine($"Error writing hash list to {filePath}: {ex.Message}");
                 }
             }
-
+            Console.WriteLine("The return of the command");
             return command;
         }
 
