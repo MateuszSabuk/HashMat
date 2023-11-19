@@ -134,6 +134,7 @@
         connection.on("ReceiveOutput", function (output) {
             // Append the output to the div
             var outputContainer = document.getElementById("output-container");
+            outputContainer.innerHTML += "<timestamp>" + getHumanReadableTimestamp() + "</timestamp>";
             outputContainer.innerHTML += output + "<br/>";
         });
 
@@ -205,6 +206,21 @@
         function viewResults() {
             // Redirect to a new page or implement logic to display results
             alert("Implement logic to display results here");
+        }
+
+        function getHumanReadableTimestamp() {
+            const currentDate = new Date();
+
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const hours = String(currentDate.getHours()).padStart(2, '0');
+            const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+            const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+            const milliseconds = String(currentDate.getMilliseconds()).padStart(3, '0');
+
+            const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+            return timestamp;
         }
 
 

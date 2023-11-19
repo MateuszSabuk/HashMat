@@ -46,3 +46,9 @@ body {
     color: white;
     background-color: #824268;
 }
+
+#output-container > timestamp {
+    font-size: 0.7rem;
+    padding: 0;
+    margin-bottom: -0.3rem;
+}
