@@ -54,13 +54,15 @@ namespace HashMat.Pages
             {
                 try
                 {
-                    johnProcess.Kill();
-                    processKilled = true;
-                    // Send the signal to the john process
-                    // For example, you might use process.StandardInput.WriteLine(signal)
-                    // or some other mechanism depending on your specific requirements
-                    // Here, I'm just printing the signal to the console for demonstration purposes
-                    Console.WriteLine($"Sending signal to process: {signal}");
+                    switch (signal)
+                    {
+                        case "kill":
+                            johnProcess.Kill();
+                            break;
+                        case "check":
+                            johnProcess.ProcessSignals(ProcessExtensions.Signum.SIGUSR1);
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {

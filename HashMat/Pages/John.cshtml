@@ -91,9 +91,21 @@
             <button id="viewResultsButton" disabled class="btn btn-success mt-3" onclick="viewResults()">View Results</button>
 
             <form asp-page-handler="Signal" method="post">
-                <button class="btn btn-success mt-3" type="submit">sendSignalToProcess</button>
-                <input type="hidden" name="signal" value="aaa" />
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="signal" id="checkSignal" value="check" checked>
+                    <label class="form-check-label" for="checkSignal">
+                        Check Signal
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="signal" id="killSignal" value="kill">
+                    <label class="form-check-label" for="killSignal">
+                        Kill Signal
+                    </label>
+                </div>
+                <button class="btn btn-success mt-3" type="submit">Send Signal To Process</button>
             </form>
+
         </div>
     </div>
 </div>
