@@ -10,6 +10,7 @@ using HashMat.Helpers;
 using System.Text.RegularExpressions;
 using System.Diagnostics.Metrics;
 using System.Reflection.Emit;
+using static HashMat.Helpers.ProcessExtensions;
 
 namespace HashMat.Pages
 {
@@ -27,6 +28,22 @@ namespace HashMat.Pages
         private string displayedOutput = "";
         private static Process johnProcess;
         private static bool processKilled = false;
+
+        ~JohnModel()
+        {
+            // Kill the process before the exit
+            if (johnProcess != null && !johnProcess.HasExited)
+            {
+                try
+                {
+                    johnProcess.Kill();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending signal to process: {ex.Message}");
+                }
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList)
