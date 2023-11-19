@@ -16,6 +16,7 @@ namespace HashMat.Helpers
         private string inputOption;
         private string selectedWordList;
         private string selectedEncoding;
+        private bool incremental;
 
         public John(IFormFile hashListFile,
                     IFormFile wordListFile,
@@ -24,7 +25,8 @@ namespace HashMat.Helpers
                     string wordListOption,
                     string inputOption,
                     string selectedWordList,
-                    string selectedEncoding)
+                    string selectedEncoding,
+                    bool incremental)
         {
             this.hashListFile = hashListFile;
             this.wordListFile = wordListFile;
@@ -34,6 +36,7 @@ namespace HashMat.Helpers
             this.inputOption = inputOption;
             this.selectedWordList = selectedWordList;
             this.selectedEncoding = selectedEncoding;
+            this.incremental = incremental;
         }
 
         public static List<string> GetAvailableAlgorithms()
@@ -153,7 +156,55 @@ namespace HashMat.Helpers
         {
             // Create list of arguments for john
             string command = string.Empty;
+            if(incremental)
+            {
+                command += "--incremental ";
+            } 
+            else {
 
+                // Set wordlist
+                if (wordListOption == "no-wordlist")
+                {
+                }
+                else if (wordListOption == "file")
+                {
+                    var filePath = $"/tmp/{Helper.GetReadableTimestamp()}_WordList.txt";
+
+                    try
+                    {
+                        var hashListFileHash = Helper.GetHashOfFile(wordListFile);
+                        var existingFilePath = Path.Combine("/tmp", $"{hashListFileHash}.txt");
+
+                        command += File.Exists(existingFilePath) ? $"--wordlist={existingFilePath} " : $"--wordlist={filePath} ";
+
+                        if (!File.Exists(existingFilePath))
+                        {
+                            // Copy the content of wordListFile directly to the file
+                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                wordListFile.CopyTo(fileStream);
+                            }
+
+                            File.SetAttributes(filePath, FileAttributes.Hidden);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error writing word list to {filePath}: {ex.Message}");
+                    }
+                }
+                else if (wordListOption == "selection")
+                {
+                    var wordListPath = $"/opt/wordlists/{selectedWordList}";
+
+                    command += File.Exists(wordListPath) ? $"--wordlist={wordListPath} " : " ";
+
+                    if (!File.Exists(wordListPath))
+                    {
+                        Console.Error.WriteLine("Error: No wordlist selected");
+                    }
+                }
+            } // END of if not incremental 
 
             // Set format
             if (!string.IsNullOrEmpty(algorithm))
@@ -162,49 +213,7 @@ namespace HashMat.Helpers
                 command += $"--format={format} ";
             }
 
-            // Set wordlist
-            if (wordListOption == "no-wordlist")
-            {
-            }
-            else if (wordListOption == "file")
-            {
-                var filePath = $"/tmp/{Helper.GetReadableTimestamp()}_WordList.txt";
-
-                try
-                {
-                    var hashListFileHash = Helper.GetHashOfFile(wordListFile);
-                    var existingFilePath = Path.Combine("/tmp", $"{hashListFileHash}.txt");
-
-                    command += File.Exists(existingFilePath) ? $"--wordlist={existingFilePath} " : $"--wordlist={filePath} ";
-
-                    if (!File.Exists(existingFilePath))
-                    {
-                        // Copy the content of wordListFile directly to the file
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            wordListFile.CopyTo(fileStream);
-                        }
-
-                        File.SetAttributes(filePath, FileAttributes.Hidden);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error writing word list to {filePath}: {ex.Message}");
-                }
-            }
-            else if (wordListOption == "selection")
-            {
-                var wordListPath = $"/opt/wordlists/{selectedWordList}";
-
-                command += File.Exists(wordListPath) ? $"--wordlist={wordListPath} " : " ";
-
-                if (!File.Exists(wordListPath))
-                {
-                    Console.Error.WriteLine("Error: No wordlist selected");
-                }
-            }
-
+            // Set encoding
             Encoding chosenEncoding = Encoding.UTF8;
             if (selectedEncoding == "utf8")
             {

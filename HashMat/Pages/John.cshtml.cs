@@ -46,10 +46,10 @@ namespace HashMat.Pages
         }
 
         [HttpPost]
-        public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList, string selectedEncoding)
+        public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList, string selectedEncoding, string incremental)
         {
             Console.WriteLine("OnPostRunJTR");
-            John john = new John(hashListFile, wordListFile, input, algorithm, wordListOption, inputOption, selectedWordList, selectedEncoding);
+            John john = new John(hashListFile, wordListFile, input, algorithm, wordListOption, inputOption, selectedWordList, selectedEncoding, incremental == "true");
             string output = await RunJTR(john);
             return new NoContentResult();
         }
@@ -61,7 +61,7 @@ namespace HashMat.Pages
             return new NoContentResult();
         }
 
-        private async Task<string> SendSignal(string signal)
+        private async Task SendSignal(string signal)
         {
             // Handle the incoming signal
             Console.WriteLine($"Received signal: {signal}");
@@ -74,9 +74,11 @@ namespace HashMat.Pages
                     switch (signal)
                     {
                         case "kill":
+                            SendLine("Kill signal sent to process", "info");
                             johnProcess.Kill();
                             break;
                         case "check":
+                            SendLine("Check signal sent to process", "info");
                             johnProcess.ProcessSignals(ProcessExtensions.Signum.SIGUSR1);
                             break;
                     }
@@ -85,8 +87,10 @@ namespace HashMat.Pages
                 {
                     Console.WriteLine($"Error sending signal to process: {ex.Message}");
                 }
+            } else
+            {
+                SendLine("No process is running", "problem");
             }
-            return "hello";
         }
 
         public async Task<string> RunJTR(John john)
@@ -132,7 +136,7 @@ namespace HashMat.Pages
             }
             if (displayedOutput.Contains("--show"))
             {
-                johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
+                johnCommand = Regex.Replace(johnCommand, @"--((incremental)|(single)|(wordlist\S+))", "");
                 johnCommand += " --show ";
                 return await RunCommand("/opt/john/run/john", johnCommand, "show");
             }
@@ -226,9 +230,10 @@ namespace HashMat.Pages
 
         private async void SendLine(string line, string label = "")
         {
-            line = ChangeLine(line);
+            if (line.Length == 0) return;
             label = ChangeLabel(line, label);
             if (label.Length > 0) { label = $"<{label}>"; }
+            line = ChangeLine(line);
             await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"{label}{line}");
         }
 
@@ -237,6 +242,10 @@ namespace HashMat.Pages
             if (line.Contains("Press Ctrl-C to abort, or send SIGUSR1 to john process for status"))
             {
                 return "Check and kill signals can be sent to the john process";
+            }
+            if (line.Contains("Use the \"--show --format="))
+            {
+                return "Running the show function";
             }
             return line;
         }
@@ -247,7 +256,7 @@ namespace HashMat.Pages
             {
                 return "info";
             }
-            if (line.Contains("% (ETA:"))
+            if (Regex.IsMatch(line, @"\d+Kp/s \d+Kc/s \d+KC/s"))
             {
                 return "status";
             }
