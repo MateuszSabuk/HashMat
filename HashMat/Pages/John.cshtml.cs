@@ -49,14 +49,9 @@ namespace HashMat.Pages
             string commandOutput = await RunCommand("/opt/john/run/john", johnCommand);
             if (displayedOutput.Contains("use \"--show\""))
             {
-                if (Regex.IsMatch(johnCommand, @"--((single)|(wordlist\S+))"))
-                {
-                    johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "--show");
-                }
-                else
-                {
-                    johnCommand += " --show ";
-                }
+                johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
+                johnCommand += " --show ";
+             
 
                 return await RunCommand("/opt/john/run/john", johnCommand);
             }
