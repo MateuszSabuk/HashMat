@@ -70,8 +70,10 @@
                             Selection
                         </label>
                         <select class="form-control" name="selectedWordList" id="selectedWordList">
-                            <option value="wordlist1">Word List 1</option>
-                            <option value="wordlist2">Word List 2</option>
+                            @foreach (var wordlist in Model.Wordlists)
+                            {
+                                <option value="@wordlist">@wordlist</option>
+                            }
                             <!-- Add more options as needed -->
                         </select>
                     </div>

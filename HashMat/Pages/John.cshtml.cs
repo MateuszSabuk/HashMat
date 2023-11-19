@@ -15,11 +15,13 @@ namespace HashMat.Pages
     public class JohnModel : PageModel
     {
         public List<string> Algorithms { get; set; }
+        public List<string> Wordlists { get; set; }
         private readonly IHubContext<CommandHub> _hubContext;
         public JohnModel(IHubContext<CommandHub> hubContext)
         {
             _hubContext = hubContext;
             Algorithms = John.GetAvailableAlgorithms();
+            Wordlists = John.GetAvailableWordlists();
         }
         private string displayedOutput = "";
 
@@ -47,11 +49,10 @@ namespace HashMat.Pages
             Console.WriteLine  ("JohnCommand: "+ johnCommand);
 
             string commandOutput = await RunCommand("/opt/john/run/john", johnCommand);
-            if (displayedOutput.Contains("use \"--show\""))
+            if (displayedOutput.Contains("--show"))
             {
                 johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
                 johnCommand += " --show ";
-             
 
                 return await RunCommand("/opt/john/run/john", johnCommand);
             }

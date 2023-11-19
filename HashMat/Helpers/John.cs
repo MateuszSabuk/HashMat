@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -63,6 +64,38 @@ namespace HashMat.Helpers
             }
             string formats = String.Concat(output.Where(c => !Char.IsWhiteSpace(c)));
             return ("Automatic,"+formats).Split(',').ToList();
+        }
+
+        public static List<string> GetAvailableWordlists()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "ls",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                Arguments = "/opt/wordlists"
+            };
+
+            string output = "";
+            using (Process process = new Process { StartInfo = psi })
+            {
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (e.Data != null)
+                    {
+                        output += ","+ e.Data;
+                    }
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+
+                process.WaitForExit();
+            }
+            return output.Length>0?output[1..].Split(',').ToList(): new List<string>();
         }
 
         public string ValidateInput()
