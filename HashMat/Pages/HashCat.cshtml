@@ -1,0 +1,58 @@
+﻿@page
+@model HashMat.Pages.HashCatModel
+@{
+    ViewData["Title"] = "HashCat";
+}
+
+<div class="container my-4">
+    <div class="row">
+        <!-- Left Column: Input Options -->
+        <div class="col-md-6">
+            <h1 class="mb-4">HashCat</h1>
+
+            <p>Configure the settings and click the button to run HashCat:</p>
+
+        </div>
+
+        <!-- Right Column: Output Container -->
+        <div class="col-md-6">
+            <div id="output-container">
+                <!-- Output will be displayed here -->
+            </div>
+            <button id="viewResultsButton" disabled class="btn btn-success mt-3" onclick="viewResults()">View Results</button>
+
+            <form asp-page-handler="Signal" method="post">
+                <button class="btn btn-success mt-3" type="submit">sendSignalToProcess</button>
+                <input type="hidden" name="signal" value="aaa" />
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/commandHub")
+            .build();
+
+        connection.on("ReceiveOutput", function (output) {
+            // Append the output to the div
+            var outputContainer = document.getElementById("output-container");
+            outputContainer.innerHTML += output + "<br/>";
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+
+        function viewResults() {
+            // Redirect to a new page or implement logic to display results
+            alert("Implement logic to display results here");
+        }
+
+
+    </script>
+}
