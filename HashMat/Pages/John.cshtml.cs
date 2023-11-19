@@ -226,6 +226,7 @@ namespace HashMat.Pages
 
         private async void SendLine(string line, string label = "")
         {
+            line = ChangeLine(line);
             label = ChangeLabel(line, label);
             if (label.Length > 0) { label = $"<{label}>"; }
             await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"{label}{line}");
