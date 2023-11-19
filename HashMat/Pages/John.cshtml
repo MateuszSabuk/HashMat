@@ -127,6 +127,44 @@
         connection.start().catch(function (err) {
             return console.error(err.toString());
         });
+        $(document).ready(function () {
+            // Initial setup on page load
+            updateFormBasedOnInputOption();
+
+            // Handle radio button change event for inputOption
+            $('input[name="inputOption"]').change(function () {
+                updateFormBasedOnInputOption();
+            });
+
+            $('input[name="wordListOption"]').change(function () {
+                updateFormBasedOnInputOption();
+            });
+        });
+
+        function updateFormBasedOnInputOption() {
+            var selectedInputOption = $('input[name="inputOption"]:checked').val();
+            var selectedWordlistOption = $('input[name="wordListOption"]:checked').val();
+
+            // Enable or disable input fields based on the selected inputOption
+            if (selectedInputOption === "input") {
+                $("#input").prop("disabled", false);
+                $("#hashListFile").prop("disabled", true);
+            } else if (selectedInputOption === "file") {
+                $("#input").prop("disabled", true);
+                $("#hashListFile").prop("disabled", false);
+            }
+
+            if (selectedWordlistOption === "no-wordlist") {
+                $("#wordListFile").prop("disabled", true);
+                $("#selectedWordList").prop("disabled", true);
+            } else if (selectedWordlistOption === "file") {
+                $("#wordListFile").prop("disabled", false);
+                $("#selectedWordList").prop("disabled", true);
+            } else if (selectedWordlistOption === "selection") {
+                $("#wordListFile").prop("disabled", true);
+                $("#selectedWordList").prop("disabled", false);
+            }
+        }
 
         function runJTR() {
             var formData = new FormData(document.getElementById("runJTRForm"));
