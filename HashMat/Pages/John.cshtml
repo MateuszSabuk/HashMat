@@ -79,6 +79,20 @@
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    <h4>Other Options:</h4>
+                    <div class="form-check">
+                        <label class="form-check-label mr-3" for="selectedEncoding">
+                            Encoding
+                        </label>
+                        <select class="form-control" name="selectedEncoding" id="selectedEncoding">
+                            <option value="utf8">UTF-8</option>
+                            <option value="ascii">ASCII (or RAW)</option>
+                            <option value="latin1">ISO-8859-1 (or Latin1 or ANSI)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <button type="button" class="btn btn-primary" onclick="runJTR()">Run John the Ripper</button>
             </form>
         </div>

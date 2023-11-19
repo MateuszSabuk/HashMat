@@ -15,6 +15,7 @@ namespace HashMat.Helpers
         private string wordListOption;
         private string inputOption;
         private string selectedWordList;
+        private string selectedEncoding;
 
         public John(IFormFile hashListFile,
                     IFormFile wordListFile,
@@ -22,7 +23,8 @@ namespace HashMat.Helpers
                     string algorithm,
                     string wordListOption,
                     string inputOption,
-                    string selectedWordList)
+                    string selectedWordList,
+                    string selectedEncoding)
         {
             this.hashListFile = hashListFile;
             this.wordListFile = wordListFile;
@@ -31,6 +33,7 @@ namespace HashMat.Helpers
             this.wordListOption = wordListOption;
             this.inputOption = inputOption;
             this.selectedWordList = selectedWordList;
+            this.selectedEncoding = selectedEncoding;
         }
 
         public static List<string> GetAvailableAlgorithms()
@@ -116,6 +119,13 @@ namespace HashMat.Helpers
                 problemBuilder.AppendLine("Invalid Input Option selected.");
             }
 
+            // Validate encoding
+            string[] allowedEncodingOptions = { "ascii", "utf8", "latin1" };
+            if (!allowedEncodingOptions.Contains(selectedEncoding))
+            {
+                problemBuilder.AppendLine("Invalid Encoding Option selected.");
+            }
+
             // Validate hash input
             if (inputOption == "input" && (input == null || input.Length == 0))
             {
@@ -195,7 +205,24 @@ namespace HashMat.Helpers
                 }
             }
 
+            Encoding chosenEncoding = Encoding.UTF8;
+            if (selectedEncoding == "utf8")
+            {
+                command += "--encoding=UTF-8 ";
+            } 
+            else if (selectedEncoding == "ascii")
+            {
+                chosenEncoding = Encoding.ASCII;
+                command += "--encoding=ASCII ";
+            }
+            else if (selectedEncoding == "latin1")
+            {
+                chosenEncoding = Encoding.Latin1;
+                command += "--encoding=ISO-8859-1 ";
+            }
 
+
+            // input
             if (inputOption == "input")
             {
                 // Safely write the input to a file
@@ -203,7 +230,7 @@ namespace HashMat.Helpers
 
                 try
                 {
-                    File.WriteAllText(fileName, input, Encoding.UTF8);
+                    File.WriteAllText(fileName, input, chosenEncoding);
                     File.SetAttributes(fileName, FileAttributes.Hidden);
                     command += fileName + " ";
                 }
@@ -228,7 +255,7 @@ namespace HashMat.Helpers
                         // Read the content of hashListFile and write it to the file
                         using (var streamReader = new StreamReader(hashListFile.OpenReadStream()))
                         {
-                            File.WriteAllText(filePath, streamReader.ReadToEnd(), Encoding.UTF8);
+                            File.WriteAllText(filePath, streamReader.ReadToEnd(), chosenEncoding);
                             File.SetAttributes(filePath, FileAttributes.Hidden);
                             Console.WriteLine("FileWritten");
                         }

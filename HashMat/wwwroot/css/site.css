@@ -18,10 +18,11 @@ body {
 }
 
 #output-container > * {
-    padding: 0 2px;
+    padding: 0.5rem 1rem;
     margin-top: 2px;
     display: block;
     width: 100%;
+    border-radius: 0.3rem;
 }
 
 #output-container > problem {

@@ -46,10 +46,10 @@ namespace HashMat.Pages
         }
 
         [HttpPost]
-        public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList)
+        public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList, string selectedEncoding)
         {
             Console.WriteLine("OnPostRunJTR");
-            John john = new John(hashListFile, wordListFile, input, algorithm, wordListOption, inputOption, selectedWordList);
+            John john = new John(hashListFile, wordListFile, input, algorithm, wordListOption, inputOption, selectedWordList, selectedEncoding);
             string output = await RunJTR(john);
             return new NoContentResult();
         }
@@ -105,8 +105,6 @@ namespace HashMat.Pages
             // Modify the command based on the new inputs
             string johnCommand = john.CreateJohnCommand();
 
-            Console.WriteLine  ("JohnCommand: "+ johnCommand);
-
             string commandOutput = await RunCommand("/opt/john/run/john", johnCommand, "normal");
 
             //check for automatic and other formats
@@ -145,6 +143,7 @@ namespace HashMat.Pages
         private async Task<string> RunCommand(string command, string arguments, string label = "")
         {
             if (processKilled) { return ""; }
+            Console.WriteLine($"Running john {arguments}");
 
             ProcessStartInfo psi = new ProcessStartInfo
             {
