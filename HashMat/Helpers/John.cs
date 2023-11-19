@@ -133,10 +133,7 @@ namespace HashMat.Helpers
                 problemBuilder.AppendLine("Word List File is required when Word List Option is set to 'file'.");
             }
 
-            if (wordListOption == "selection" && (wordListFile == null || wordListFile.Length == 0))
-            {
-                problemBuilder.AppendLine("Word List File is required when Word List Option is set to 'file'.");
-            }
+            // TODO: Validate that the wordlist does exist
 
             // TODO: More validation (Definitely file and algorithm validations
 
@@ -158,7 +155,7 @@ namespace HashMat.Helpers
             if (wordListOption == "no-wordlist")
             {
             }
-            else if (wordListOption == "wordlist-from-file")
+            else if (wordListOption == "file")
             {
                 var filePath = $"/tmp/{Helper.GetReadableTimestamp()}_WordList.txt";
 
@@ -185,9 +182,9 @@ namespace HashMat.Helpers
                     Console.Error.WriteLine($"Error writing word list to {filePath}: {ex.Message}");
                 }
             }
-            else if (wordListOption == "wordlist-from-selection")
+            else if (wordListOption == "selection")
             {
-                var wordListPath = $"/root/wordlists/{selectedWordList}";
+                var wordListPath = $"/opt/wordlists/{selectedWordList}";
 
                 command += File.Exists(wordListPath) ? $"--wordlist={wordListPath} " : " ";
 
