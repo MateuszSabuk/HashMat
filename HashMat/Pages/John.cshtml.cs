@@ -96,7 +96,7 @@ namespace HashMat.Pages
             //Console.WriteLine("Problem: "+problem);
             if (problem.Length > 0)
             {
-                await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"Problem:>> {problem} <<");
+                await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"<problem>{problem}<problem>");
                 return problem;
             }
 

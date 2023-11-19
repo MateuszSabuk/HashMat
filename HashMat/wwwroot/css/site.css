@@ -16,3 +16,22 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+#output-container > * {
+    padding-left: 0 2px;
+    margin-top: 2px;
+    display: block;
+    width: 100%;
+}
+
+#output-container > problem {
+    background-color: #d95c43;
+}
+
+#output-container > normal {
+    background-color: #80caff;
+}
+
+#output-container > show {
+    background-color: #5fed72;
+}
