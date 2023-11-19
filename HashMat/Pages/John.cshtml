@@ -88,8 +88,12 @@
             <div id="output-container">
                 <!-- Output will be displayed here -->
             </div>
-
             <button id="viewResultsButton" disabled class="btn btn-success mt-3" onclick="viewResults()">View Results</button>
+
+            <form asp-page-handler="Signal" method="post">
+                <button class="btn btn-success mt-3" type="submit">sendSignalToProcess</button>
+                <input type="hidden" name="signal" value="aaa" />
+            </form>
         </div>
     </div>
 </div>
@@ -132,6 +136,8 @@
                 }
             });
         }
+
+
 
         function viewResults() {
             // Redirect to a new page or implement logic to display results

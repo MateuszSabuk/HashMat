@@ -25,17 +25,54 @@ namespace HashMat.Pages
             Wordlists = John.GetAvailableWordlists();
         }
         private string displayedOutput = "";
+        private static Process johnProcess;
+        private static bool processKilled = false;
 
         [HttpPost]
         public async Task<IActionResult> OnPostRunJTR(IFormFile hashListFile, IFormFile wordListFile, string input, string algorithm, string wordListOption, string inputOption, string selectedWordList)
         {
+            Console.WriteLine("OnPostRunJTR");
             John john = new John(hashListFile, wordListFile, input, algorithm, wordListOption, inputOption, selectedWordList);
             string output = await RunJTR(john);
             return new NoContentResult();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> OnPostSignal(string signal)
+        {
+            await SendSignal(signal);
+            return new NoContentResult();
+        }
+
+        private async Task<string> SendSignal(string signal)
+        {
+            // Handle the incoming signal
+            Console.WriteLine($"Received signal: {signal}");
+
+            // Implement logic to handle the signal, e.g., communicate with the john process
+            if (johnProcess != null && !johnProcess.HasExited)
+            {
+                try
+                {
+                    johnProcess.Kill();
+                    processKilled = true;
+                    // Send the signal to the john process
+                    // For example, you might use process.StandardInput.WriteLine(signal)
+                    // or some other mechanism depending on your specific requirements
+                    // Here, I'm just printing the signal to the console for demonstration purposes
+                    Console.WriteLine($"Sending signal to process: {signal}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending signal to process: {ex.Message}");
+                }
+            }
+            return "hello";
+        }
+
         public async Task<string> RunJTR(John john)
         {
+            processKilled= false;
             string problem = john.ValidateInput();
             //Console.WriteLine("Problem: "+problem);
             if (problem.Length > 0)
@@ -44,6 +81,8 @@ namespace HashMat.Pages
                 return problem;
             }
 
+
+            // await RunCommand("bash", "-c \"echo A && sleep 2 && echo B && sleep 2 && echo C\"", "ABC");
             // Modify the command based on the new inputs
             string johnCommand = john.CreateJohnCommand();
 
@@ -62,6 +101,7 @@ namespace HashMat.Pages
 
         private async Task<string> RunCommand(string command, string arguments, string label = "")
         {
+            if (processKilled) { return ""; }
             if (label.Length > 0) { label = $"<{label}>"; }
 
             ProcessStartInfo psi = new ProcessStartInfo
@@ -76,14 +116,15 @@ namespace HashMat.Pages
             };
 
             string output = "";
-            using (Process process = new Process { StartInfo = psi })
+            try
             {
-                // Start the process
-                process.Start();
+                johnProcess = new Process { StartInfo = psi };
+                    // Start the process
+                johnProcess.Start();
 
                 // Read the standard output and standard error streams asynchronously
-                Task<string> outputReader = ReadOutputAsync(process.StandardOutput, label);
-                Task<string> errorReader = ReadOutputAsync(process.StandardError, label);
+                Task<string> outputReader = ReadOutputAsync(johnProcess.StandardOutput, label);
+                Task<string> errorReader = ReadOutputAsync(johnProcess.StandardError, label);
 
                 // Wait for both output and error to be read
                 await Task.WhenAll(outputReader, errorReader);
@@ -101,8 +142,8 @@ namespace HashMat.Pages
                 }
 
                 // Wait for the process to exit
-                process.WaitForExit();
-            }
+                johnProcess.WaitForExit();
+            } catch (Exception ex) { }
             return output;
         }
 
