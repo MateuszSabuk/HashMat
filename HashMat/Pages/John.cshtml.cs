@@ -96,7 +96,7 @@ namespace HashMat.Pages
             //Console.WriteLine("Problem: "+problem);
             if (problem.Length > 0)
             {
-                await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"<problem>{problem}<problem>");
+                SendLine(problem, "problem");
                 return problem;
             }
 
@@ -108,20 +108,43 @@ namespace HashMat.Pages
             Console.WriteLine  ("JohnCommand: "+ johnCommand);
 
             string commandOutput = await RunCommand("/opt/john/run/john", johnCommand, "normal");
+
+            //check for automatic and other formats
+            if (johnCommand.Contains("--format=all") && displayedOutput.Contains("Use the \"--format="))
+            {
+                MatchCollection matchList = Regex.Matches(displayedOutput, @"(?<=(--format=))\S+?(?="")");
+                List<string> detectedFormats = matchList.Cast<Match>().Select(match => match.Value).ToList();
+
+                foreach (var detectedFormat in detectedFormats) // Replace detectedFormats with the actual variable containing detected formats
+                {
+                    string command = Regex.Replace(johnCommand, @"(?<=(--format=))\S+", detectedFormat);
+
+                    SendLine($"Running john for {detectedFormat} format","info");
+                    commandOutput = await RunCommand("/opt/john/run/john", command, "normal");
+
+                    // Process the output or handle it as needed
+                    if (displayedOutput.Contains("--show"))
+                    {
+                        johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
+                        johnCommand += " --show ";
+                        johnCommand = Regex.Replace(johnCommand, @"(?<=(--format=))\S+", detectedFormat);
+                        return await RunCommand("/opt/john/run/john", johnCommand, "show");
+                    }
+                }
+            }
             if (displayedOutput.Contains("--show"))
             {
                 johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
                 johnCommand += " --show ";
-
-                return await RunCommand("/opt/john/run/john", johnCommand,"show");
+                return await RunCommand("/opt/john/run/john", johnCommand, "show");
             }
+
             return commandOutput;
         }
 
         private async Task<string> RunCommand(string command, string arguments, string label = "")
         {
             if (processKilled) { return ""; }
-            if (label.Length > 0) { label = $"<{label}>"; }
 
             ProcessStartInfo psi = new ProcessStartInfo
             {
@@ -156,7 +179,7 @@ namespace HashMat.Pages
                     while ((line = await stringReader.ReadLineAsync()) != null)
                     {
                         displayedOutput += label + line;
-                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", label + line);
+                        SendLine(line, label);
                     }
                 }
 
@@ -189,14 +212,46 @@ namespace HashMat.Pages
                     foreach (var line in linesToSend.Split("\n"))
                     {
                         displayedOutput += label + line;
-
+                        if (line.Contains(" option to force loading these as that type instead"))
+                        {
+                            continue;
+                        }
                         // Send the lines to the SignalR hub
-                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", label + line);
+                        SendLine(line, label);
                     }
                 }
             }
 
             return outputBuilder.ToString();
+        }
+
+        private async void SendLine(string line, string label = "")
+        {
+            label = ChangeLabel(line, label);
+            if (label.Length > 0) { label = $"<{label}>"; }
+            await _hubContext.Clients.All.SendAsync("ReceiveOutput", $"{label}{line}");
+        }
+
+        private string ChangeLine(string line)
+        {
+            if (line.Contains("Press Ctrl-C to abort, or send SIGUSR1 to john process for status"))
+            {
+                return "Check and kill signals can be sent to the john process";
+            }
+            return line;
+        }
+
+        private string ChangeLabel(string line, string label)
+        {
+            if (line.Contains(", but the string is also recognized as "))
+            {
+                return "info";
+            }
+            if (line.Contains("% (ETA:"))
+            {
+                return "status";
+            }
+            return label;
         }
     }
 }

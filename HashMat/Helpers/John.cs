@@ -146,9 +146,10 @@ namespace HashMat.Helpers
 
 
             // Set format
-            if (!string.IsNullOrEmpty(algorithm) && algorithm != "Automatic")
+            if (!string.IsNullOrEmpty(algorithm))
             {
-                command += $"--format={algorithm} ";
+                var format = algorithm == "Automatic" ? "all" : algorithm;
+                command += $"--format={format} ";
             }
 
             // Set wordlist
