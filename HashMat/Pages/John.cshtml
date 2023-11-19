@@ -101,9 +101,11 @@
             <div id="output-container" style="height: 60vh;overflow-y: auto;">
                 <!-- Output will be displayed here -->
             </div>
-            <button id="viewResultsButton" disabled class="btn btn-success mt-3" onclick="viewResults()">View Results</button>
+            <button id="saveResultsButton" class="btn btn-success mt-3" onclick="saveResults()">Save Results</button>
+            <button id="clearResultsButton" class="btn btn-success mt-3" onclick="clearResults()">Clear Results</button>
 
             <form asp-page-handler="Signal" method="post">
+                <button class="btn btn-success mt-3" type="submit">Send Signal To Process</button>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="signal" id="checkSignal" value="check" checked>
                     <label class="form-check-label" for="checkSignal">
@@ -116,7 +118,6 @@
                         Kill Signal
                     </label>
                 </div>
-                <button class="btn btn-success mt-3" type="submit">Send Signal To Process</button>
             </form>
 
         </div>
@@ -203,9 +204,39 @@
 
 
 
-        function viewResults() {
+        function saveResults() {
+            var container = document.getElementById("output-container");
+            // Extract timestamp and tag information
+            const entries = Array.from(container.children);
+            
+            // Create an array to store formatted lines
+            const formattedLines = [];
+
+            for (let i = 0; i < entries.length; i += 2) {
+                const timestamp = entries[i].innerText.trim();
+                const tag = entries[i + 1].tagName.toLowerCase();
+                const text = entries[i + 1].innerText.trim();
+
+                formattedLines.push(`${timestamp} - Tag: ${tag} - ${text}`);
+            }
+
+            // Combine lines into a single string
+            const resultString = formattedLines.join('\n');
+
+            // Save the string to a file
+            const blob = new Blob([resultString], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'output.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function clearResults() {
             // Redirect to a new page or implement logic to display results
-            alert("Implement logic to display results here");
+            var outputContainer = document.getElementById("output-container");
+            outputContainer.innerHTML = "";
         }
 
         function getHumanReadableTimestamp() {
