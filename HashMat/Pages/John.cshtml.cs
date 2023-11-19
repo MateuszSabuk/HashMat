@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using HashMat.Helpers;
 using System.Text.RegularExpressions;
 using System.Diagnostics.Metrics;
+using System.Reflection.Emit;
 
 namespace HashMat.Pages
 {
@@ -48,19 +49,21 @@ namespace HashMat.Pages
 
             Console.WriteLine  ("JohnCommand: "+ johnCommand);
 
-            string commandOutput = await RunCommand("/opt/john/run/john", johnCommand);
+            string commandOutput = await RunCommand("/opt/john/run/john", johnCommand, "normal");
             if (displayedOutput.Contains("--show"))
             {
                 johnCommand = Regex.Replace(johnCommand, @"--((single)|(wordlist\S+))", "");
                 johnCommand += " --show ";
 
-                return await RunCommand("/opt/john/run/john", johnCommand);
+                return await RunCommand("/opt/john/run/john", johnCommand,"show");
             }
             return commandOutput;
         }
 
-        private async Task<string> RunCommand(string command, string arguments)
+        private async Task<string> RunCommand(string command, string arguments, string label = "")
         {
+            if (label.Length > 0) { label = $"<{label}>"; }
+
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = command,
@@ -79,8 +82,8 @@ namespace HashMat.Pages
                 process.Start();
 
                 // Read the standard output and standard error streams asynchronously
-                Task<string> outputReader = ReadOutputAsync(process.StandardOutput);
-                Task<string> errorReader = ReadOutputAsync(process.StandardError);
+                Task<string> outputReader = ReadOutputAsync(process.StandardOutput, label);
+                Task<string> errorReader = ReadOutputAsync(process.StandardError, label);
 
                 // Wait for both output and error to be read
                 await Task.WhenAll(outputReader, errorReader);
@@ -92,8 +95,8 @@ namespace HashMat.Pages
                     string line;
                     while ((line = await stringReader.ReadLineAsync()) != null)
                     {
-                        displayedOutput += line;
-                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", line);
+                        displayedOutput += label + line;
+                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", label + line);
                     }
                 }
 
@@ -103,7 +106,7 @@ namespace HashMat.Pages
             return output;
         }
 
-        private async Task<string> ReadOutputAsync(StreamReader reader)
+        private async Task<string> ReadOutputAsync(StreamReader reader, string label)
         {
             StringBuilder outputBuilder = new StringBuilder();
             char[] buffer = new char[4096];
@@ -125,10 +128,10 @@ namespace HashMat.Pages
                     }
                     foreach (var line in linesToSend.Split("\n"))
                     {
-                        displayedOutput += line;
+                        displayedOutput += label + line;
 
                         // Send the lines to the SignalR hub
-                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", line);
+                        await _hubContext.Clients.All.SendAsync("ReceiveOutput", label + line);
                     }
                 }
             }
