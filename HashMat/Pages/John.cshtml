@@ -106,23 +106,24 @@
             </div>
             <button id="saveResultsButton" class="btn btn-success mt-3" onclick="saveResults()">Save Results</button>
             <button id="clearResultsButton" class="btn btn-success mt-3" onclick="clearResults()">Clear Results</button>
+            <h4 class="mt-3">Send Signals:</h4>
 
-            <form asp-page-handler="Signal" method="post">
-                <button class="btn btn-success mt-3" type="submit">Send Signal To Process</button>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="signal" id="checkSignal" value="check" checked>
-                    <label class="form-check-label" for="checkSignal">
-                        Check Signal
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="signal" id="killSignal" value="kill">
-                    <label class="form-check-label" for="killSignal">
-                        Kill Signal
-                    </label>
-                </div>
-            </form>
+            <div class="">
+                <form asp-page-handler="Signal" method="post" class="btn-group" role="group">
+                    <input type="hidden" name="signal" value="check" />
+                    <button class="btn btn-success" type="submit">CHECK</button>
+                </form>
 
+                <form asp-page-handler="Signal" method="post" class="btn-group" role="group">
+                    <input type="hidden" name="signal" value="kill" />
+                    <button class="btn btn-warning" type="submit">KILL</button>
+                </form>
+
+                <form asp-page-handler="Signal" method="post" class="btn-group" role="group">
+                    <input type="hidden" name="signal" value="kill-all" />
+                    <button class="btn btn-danger" type="submit">KILL ALL</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

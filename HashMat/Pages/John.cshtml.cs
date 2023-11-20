@@ -74,11 +74,16 @@ namespace HashMat.Pages
                     switch (signal)
                     {
                         case "kill":
-                            SendLine("Kill signal sent to process", "info");
+                            SendLine("KILL signal sent to process", "info");
                             johnProcess.Kill();
                             break;
+                        case "kill-all":
+                            SendLine("KILL ALL signal sent to process", "info");
+                            johnProcess.Kill();
+                            processKilled = true;
+                            break;
                         case "check":
-                            SendLine("Check signal sent to process", "info");
+                            SendLine("CHECK signal sent to process", "info");
                             johnProcess.ProcessSignals(ProcessExtensions.Signum.SIGUSR1);
                             break;
                     }
@@ -121,6 +126,7 @@ namespace HashMat.Pages
                 {
                     string command = Regex.Replace(johnCommand, @"(?<=(--format=))\S+", detectedFormat);
 
+                    if (processKilled) { break; }
                     SendLine($"Running john for {detectedFormat} format","info");
                     commandOutput = await RunCommand("/opt/john/run/john", command, "normal");
 
