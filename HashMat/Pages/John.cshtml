@@ -101,7 +101,8 @@
         </div>
         <!-- Right Column: Output Container -->
         <div class="col-md-6">
-            <div id="output-container" style="height: 60vh;overflow-y: auto;">
+            <h4>Output:</h4>
+            <div id="output-container">
                 <!-- Output will be displayed here -->
             </div>
             <button id="saveResultsButton" class="btn btn-success mt-3" onclick="saveResults()">Save Results</button>
@@ -141,6 +142,7 @@
             var outputContainer = document.getElementById("output-container");
             outputContainer.innerHTML += "<timestamp>" + getHumanReadableTimestamp() + "</timestamp>";
             outputContainer.innerHTML += output + "<br/>";
+            outputContainer.scrollTop = outputContainer.scrollHeight;
         });
 
         connection.start().catch(function (err) {

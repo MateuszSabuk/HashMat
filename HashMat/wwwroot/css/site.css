@@ -17,12 +17,18 @@ body {
   margin-bottom: 60px;
 }
 
+#output-container {
+    height: 50vh;
+    overflow-y: scroll;
+    background: #eee;
+    border-radius: 0.5rem;
+}
+
 #output-container > * {
     padding: 0.5rem 1rem;
     margin-top: 2px;
     display: block;
     width: 100%;
-    border-radius: 0.3rem;
 }
 
 #output-container > problem {
