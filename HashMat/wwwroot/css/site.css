@@ -58,3 +58,7 @@ body {
     padding: 0;
     margin-bottom: -0.3rem;
 }
+
+#output-container > warning {
+    background-color: #fa8628;
+}

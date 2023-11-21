@@ -153,6 +153,10 @@ namespace HashMat.Pages
         private async Task<string> RunCommand(string command, string arguments, string label = "")
         {
             if (processKilled) { return ""; }
+            if (johnProcess != null && !johnProcess.HasExited)
+            {
+                SendLine("Cant run tho jonh processes at the same time (At least yet)", "warning");
+            }
             Console.WriteLine($"Running john {arguments}");
 
             ProcessStartInfo psi = new ProcessStartInfo
