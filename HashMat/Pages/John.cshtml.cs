@@ -156,6 +156,7 @@ namespace HashMat.Pages
             if (johnProcess != null && !johnProcess.HasExited)
             {
                 SendLine("Cant run tho jonh processes at the same time (At least yet)", "warning");
+                return "";
             }
             Console.WriteLine($"Running john {arguments}");
 
