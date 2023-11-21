@@ -249,7 +249,7 @@ namespace HashMat.Pages
             {
                 return "Check and kill signals can be sent to the john process";
             }
-            if (line.Contains("Use the \"--show --format="))
+            if (line.Contains("Use the \"--show"))
             {
                 return "Running the show function";
             }
