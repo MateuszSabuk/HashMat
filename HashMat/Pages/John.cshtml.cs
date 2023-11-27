@@ -86,13 +86,18 @@ namespace HashMat.Pages
                             SendLine("CHECK signal sent to process", "info");
                             johnProcess.ProcessSignals(ProcessExtensions.Signum.SIGUSR1);
                             break;
+                        case "keep-alive":
+                            SendLine("Keep Alive status check", "info");
+                            johnProcess.ProcessSignals(ProcessExtensions.Signum.SIGUSR1);
+                            break;
+
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error sending signal to process: {ex.Message}");
                 }
-            } else
+            } else if (signal != "keep-alive")
             {
                 SendLine("No process is running", "problem");
             }

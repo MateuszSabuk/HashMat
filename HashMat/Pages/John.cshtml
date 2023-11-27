@@ -119,10 +119,13 @@
                     <input type="hidden" name="signal" value="kill" />
                     <button class="btn btn-warning" type="submit">KILL</button>
                 </form>
-
+                
                 <form asp-page-handler="Signal" method="post" class="btn-group" role="group">
                     <input type="hidden" name="signal" value="kill-all" />
                     <button class="btn btn-danger" type="submit">KILL ALL</button>
+                </form>
+                <form id="KeepAliveForm" method="post" class="btn-group" role="group">
+                    <input type="hidden" name="signal" value="keep-alive" />
                 </form>
             </div>
         </div>
@@ -207,6 +210,28 @@
                 }
             });
         }
+
+        function keepConnectionAlive() {
+            var reqData = new FormData(document.getElementById("KeepAliveForm"));
+
+            $.ajax({
+                type: "POST",
+                url: "/John?handler=Signal",
+                data: reqData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                },
+                error: function (error) {
+                    console.error('Error keeping connection alive:', error);
+                }
+            });
+        }
+
+        // Perform the initial keep alive and set an interval to repeat it
+        keepConnectionAlive();
+        setInterval(keepConnectionAlive, 60000); // Repeat every minute (adjust as needed)
+
 
 
 
